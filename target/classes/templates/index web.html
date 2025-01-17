@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang=en xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+	<meta charset=utf-8>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Snap Your Tee!</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+        height: 100%;
+        font-family: 'Roboto', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-image: url("/img/IMG_7487.jpg");
+        background-size: cover;
+        background-repeat: repeat;
+        color: #333;
+    }
+
+    #wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        min-height: 80vh;
+        max-width: 90%;
+        margin: 20px;
+        max-width: 800px;
+    }
+
+    .media-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    textarea {
+        width: 90%;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-top: 20px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 0.5rem;
+        line-height: 1.6;
+        resize: vertical;
+        max-height: 150px;
+    }
+
+    /* Button Group container */
+    .button-group {
+        display: flex;
+        justify-content: center;
+        /* Center buttons horizontally */
+        gap: 10px;
+        /* Spacing between buttons */
+        padding: 10px 0px;
+        /* Padding for content */
+        margin-top: 10px;
+        /* Margin for spacing from other content */
+        margin-bottom: 10px;
+    }
+
+    /* Updated button styles */
+    .button-group button {
+        background-color: #f0f0f0;
+        /* Ivory background */
+        color: #333;
+        /* Dark gray text */
+        border: 1px solid #ddd;
+        /* Light gray border */
+        padding: 8px 12px;
+        /* Reduced padding for smaller buttons */
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        height: 35px;
+        /* Reduced height */
+        width: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* Removed flex:1 for fixed size */
+    }
+
+
+    .button-group button:hover {
+        background-color: #e0e0e0;
+        /* Slightly darker gray on hover */
+        transform: scale(1.02);
+    }
+
+    .button-group button:active {
+        transform: scale(0.98);
+    }
+
+    #imagerecommendationsdiv {
+        margin-top: 20px;
+    }
+
+    #imagerecommendationsdiv .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        justify-items: center;
+    }
+
+    #imagerecommendationsdiv .image-container {
+        position: relative;
+        /* Set relative position for absolute positioning within*/
+        width: 200px;
+        height: 200px;
+        perspective: 1000px;
+        /* needed for 3d transform */
+        margin: 10px;
+    }
+
+
+    #imagerecommendationsdiv .image-container img {
+        width: 100%;
+        /* Set width to 100% to make it responsive */
+        height: 100%;
+        /* Set height to 100% to make it responsive */
+        object-fit: cover;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.6s ease;
+        backface-visibility: hidden;
+        /* Hide back side during rotation*/
+        position: absolute;
+        /* needed for flipping images */
+        top: 0;
+        left: 0;
+    }
+
+    #imagerecommendationsdiv .image-container .front {
+        z-index: 2;
+        /* Front image is above back */
+    }
+
+    #imagerecommendationsdiv .image-container .back {
+        transform: rotateY(180deg);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(255, 255, 255, 0.9);
+        font-size: 1em;
+        text-align: center;
+        padding: 5px;
+    }
+
+    #upload {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #f0f0f0;
+        /* Match button color */
+        cursor: pointer;
+    }
+
+
+
+    #imagerecommendationsdiv .image-container.flipped .front {
+        transform: rotateY(180deg);
+    }
+
+    #imagerecommendationsdiv .image-container.flipped .back {
+        transform: rotateY(0deg);
+    }
+
+
+    h1 {
+        font-size: 2.5em;
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    #wrapper>p {
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #555;
+        max-width: 80%;
+        text-align: center;
+    }
+
+    #spinner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+    }
+
+    .loading-spinner {
+        border: 10px solid #f3f3f3;
+        border-top: 10px solid #3498db;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    video,
+    canvas {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        max-width: 100%;
+        height: auto;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 10px;
+    }
+
+    video {
+        width: 400px;
+        height: 400px;
+        object-fit: cover;
+        /* Added to maintain aspect ratio */
+    }
+
+    canvas {
+        width: 400px;
+        height: 400px;
+    }
+
+    @media (max-width: 768px) {
+        #wrapper {
+            padding: 20px;
+            margin: 10px;
+            min-height: 90vh;
+        }
+
+        #wrapper>p {
+            max-width: 95%;
+        }
+
+        textarea {
+            font-size: 0.95rem;
+        }
+
+        button {
+            font-size: 0.95rem;
+        }
+
+        #imagerecommendationsdiv img {
+            max-width: 150px;
+            max-height: 150px;
+        }
+
+        #imagerecommendationsdiv .image-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+    }
+
+    /* Styles for hidden content */
+    .hidden-content {
+        display: none;
+        margin-top: 20px;
+    }
+
+    .heading-style {
+        font-size: 2em;
+        /* Increased font size for heading */
+        font-weight: 600;
+        color: #2c3e50;
+        /* Choose a dark color for better contrast */
+        margin-bottom: 20px;
+        text-align: center;
+        letter-spacing: 1px;
+        /* Optional: Adjust letter spacing */
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        /* Optional: Add a subtle shadow */
+    }
+
+    .p-style {
+        font-size: 1rem;
+        /* decreased font size for para */
+        font-weight: 100;
+        color: #2c3e50;
+        /* Choose a dark color for better contrast */
+        margin-bottom: 20px;
+        text-align: center;
+        letter-spacing: 1px;
+        /* Optional: Adjust letter spacing */
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        /* Optional: Add a subtle shadow */
+    }
+
+    #upload-button-container {
+        display: flex;
+        align-items: center;
+    }
+
+    #upload-button-container .upload-dot {
+        background-color: #f0f0f0;
+        /* Same color as your buttons */
+        width: 20px;
+        /* Adjust size as needed */
+        height: 20px;
+        border-radius: 50%;
+        /* Make it a circle */
+        cursor: pointer;
+        margin-right: 5px;
+        /*Spacing from the actual button*/
+    }
+
+    /* Styles for the walkthrough */
+    #walkthrough {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        width: 100%;
+        /* Make it wide enough to fit the steps */
+        overflow-x: auto;
+        /* Allow horizontal scrolling if needed */
+        padding: 20px 0;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin: 0 20px;
+        /* Space between steps */
+        position: relative;
+        white-space: nowrap;
+    }
+
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #3498db;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 1.3em;
+    }
+
+    .step-desc {
+        font-size: 0.85em;
+        font-color: white;
+        width: 140px;
+        text-align: center;
+    }
+
+    .step-arrow {
+        position: absolute;
+        top: 50%;
+        right: -18px;
+        /* Adjust as needed for spacing */
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-left: 15px solid #3498db;
+        /* Arrow color matching circle */
+    }
+
+    .step:last-child .step-arrow {
+        display: none;
+    }
+
+    .svg-icon {
+        width: 24px;
+        height: 24px;
+        vertical-align: middle;
+        /* Align with text */
+        margin-right: 5px;
+        /* Spacing */
+    }
+</style>
+
+<script src="/js/script.js" defer></script>
+	</head>
+	
+
+  <body>
+
+    <h1 id="msg"> Snap & Style! </h1>
+
+    <div id="wrapper" style="height: 100%;">
+
+        <div class="media-container">
+            <video></video>
+            <canvas></canvas>
+        </div>
+
+        <h2 class="heading-style">Discover Your Style</h2>
+        <h3 class="p-style"> Snap & Style! Save or Upload your top picture, and let AI find bottom-fit matches & show styling ideas!
+        </h3>
+
+        <div class="button-group" style="padding:10px 0px;">
+            <button id="newphoto">Snap</button>
+            <button id="download" disabled="disabled">Save</button> or 
+            <button id="uploadbutton" onclick="document.getElementById('upload').click();">Upload</button>
+
+            <input type="file" id="upload" accept="image/*" onchange="onUpload();" style="display:none;">
+
+            <div id="upload-button-container">
+                <div class="upload-dot"  style="display:none;"></div>
+                
+               
+            </div>
+           </div>
+           
+    
+        <div id="validation-alert" style="color: red;"></div>
+
+    <div id="hiddenContentDiv" class="hidden-content">
+    <form id="formprompt" name="formprompt" action="#" th:action="@{/describepic}" th:object="${prompt}" method="post" >
+      <input type="hidden" th:field="*{response}"  id="hiddenimage" > 
+      <input type="hidden" th:field="*{selectedResponse}"  id="hiddenimageoutfit" > 
+
+      <div class="button-group">
+      <button id="describe"  onclick="onDescribe();">Style</button> 
+      <button id="generate"  onclick="onGenerate();">Show</button>
+    </div>
+   
+      <div id="spinner">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!--textarea th:text="${description}" id="description" type="text" th:value="${description}" style="overflow-y: scroll; font-family: Roboto, sans-serif; font-size: 15px;" rows="5" cols="100" placeholder="This field shows the recommended matches for your outfit. Feel free to personalize the prompt by suffixing more details in the end. Example suffix: I identify as an Indian wheatish brown complexioned woman. Style the image with one of the recommendations above. Also add hoops for earrings and pixie cut for a hairstyle."></textarea> -->
+    
+<textarea th:text="${description}" id="description" type="text" th:value="${description}" style="overflow-y: scroll; font-family: Roboto, sans-serif; font-size: 15px;" rows="5" cols="100"></textarea>
+<div style="font-style: italic; color: #999; margin-top: 5px;">
+  ***PRO TIP: Add personalization details for better styling visualization (on click of "show"). Example: 
+  A grey v-neck half sleeve t-shirt. STYLE RECOMMENDATION: A pair of cropped white trousers. Also add hoops for earrings and a stylish blunt bob cut for a hairstyle. Style for a wheatish brown complexioned, happy face woman.
+</div>
+<br/>
+<br/>
+    <input type="hidden" th:field="*{description}"  id="hiddendescriptionflag" > 
+    <input type="hidden" th:field="*{style}"  id="hiddenstyleflag" > 
+    <input type="hidden" th:field="*{show}"  id="hiddenshowflag" > 
+    
+    
+
+  <div id="imagerecommendationsdiv" th:if="${not #lists.isEmpty(recommendation)}">
+    <div class="image-grid" th:if="${not #lists.isEmpty(recommendation)}">
+      <div th:each="recc, stat : ${recommendation}" class="image-container" onclick="flipImage(event); selectImage(event, this)" >
+        <img class="front" th:src="${recc}" alt="Generated Image"/>
+        <div class="back">
+           <p th:text="${recommendationdesc[stat.index]}"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--include another div to check if the value of the controller returned variable "imagestring" is nonempty, then
+  display the image returned by the base64 string-->
+  
+    <div id="imageoutputdiv" th:if="${imagestring != null and imagestring != ''}">
+        <img th:src="${imagestring}" alt="Generated Image" style="max-width: 100%; height: auto;"/>
+    </div>
+
+	</form>
+
+    <p style="text-align: center; font-style: italic; font-size: 15px; margin-top: 20px;">
+        <b>Please note:</b> Please be aware that this application uses generative AI models for its recommendations. Given that the field is still evolving, recommendations and media generated may contain content that is inappropriate, irrelevant or inaccurate.
+        </p>
+</div>
+
+
+
+
+</div>
+
+
+ <!-- Walkthrough -->
+ <div id="walkthrough">
+    <div class="step">
+        <div class="step-circle">1</div>
+         <div class="step-desc"> SNAP or UPLOAD</div>
+        <div class="step-arrow"></div>
+    </div>
+    <div class="step">
+        <div class="step-circle">2</div>
+          <div class="step-desc">STYLE for bottom-fit</div>
+           <div class="step-arrow"></div>
+    </div>
+    <div class="step">
+        <div class="step-circle">3</div>
+         <div class="step-desc">Personalize & SHOW!</div>
+          <div class="step-arrow"></div>
+    </div>
+</div>
+
+  </body>
+  
+</html>
